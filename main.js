@@ -2,20 +2,18 @@ const video = document.getElementById("videoin");
 const audioSelect = document.getElementById('audioSource');
 const videoSelect = document.getElementById('videoSource');
 const canvas = document.getElementById("canvasplace");
+const overlay = document.getElementById("overlay");
 const context = canvas.getContext("2d");
-
+const overlayctx = overlay.getContext("2d");
 
 const display_age = document.getElementById("age")
 const display_gender = document.getElementById("gender")
-const display_agelow = document.getElementById("agelow")
 const display_loop = document.getElementById("loop")
 
 
 video.addEventListener("loadeddata", () => {
     console.log(video.videoWidth, video.videoHeight);
 });
-
-
 
 // Updates the select element with the provided set of cameras
 function updateCameraList(cameras) {
@@ -88,6 +86,8 @@ function handleError(error) {
 
 canvas.width = 640;
 canvas.height = 480;
+overlay.width = 320;
+overlay.height = 240;
 
 let promises = null;
 
@@ -107,89 +107,56 @@ let changecolor = false ;
 
 const animationLoop= ()=> {
     if (promises) {
-        _livenessCheck = true ; 
+        _livenessCheck = false ; 
+        testvideo = video
         const process_frame = async () => {
             const detection = _livenessCheck 
             ? await faceapi.detectSingleFace(
-                        video, new faceapi.TinyFaceDetectorOptions()
+                        testvideo, new faceapi.TinyFaceDetectorOptions()
                     ).withFaceLandmarks().withAgeAndGender().withFaceDescriptor()
             : await faceapi.detectSingleFace(
-                        video, new faceapi.TinyFaceDetectorOptions()  
+                        testvideo, new faceapi.TinyFaceDetectorOptions()  
                         ).withFaceLandmarks().withAgeAndGender()
             if (detection) {
-                    const age = Math.round(detection.age);
-                    const gender = detection.gender ;
-                    let leftEye = detection.landmarks.getLeftEye()[0];
-                    let rightEye = detection.landmarks.getRightEye()[0];
-                    let eyeDistance = Math.abs(rightEye.x - leftEye.x);
-                    let nose = detection.landmarks.getNose()[4];
-                    //let lookingStraight = Math.abs(nose - (leftEye + rightEye) / 2) < eyeDistance * 0.125;
-                    if (detection.detection.score > 0.9) {
-  
-                        ages.unshift (age);
-                        ages = ages.slice(0,50);
-                        average = 0;
-                        for (i = 0 ; i < ages.length ; i++ ) {
-                            average +=ages[i];  
-                        }
-                        average /= ages.length;
-                        display_age.innerHTML = Math.floor(average).toString();
-                        if(changecolor) {
-                            display_age.style.background = 'green';
-                            display_age.style.color = 'white';
-                        } else {
-                            display_age.style.background = 'white';
-                            display_age.style.color = 'green';
-                        }
-                        changecolor = !changecolor ;
-                        
-                    }    
-                    if (detection.detection.score > 0.75) {
-                        ageslow.unshift (age)
-                        ageslow = ageslow.slice(0,50)
+                const age = Math.round(detection.age);
+                const gender = detection.gender ;
+                let leftEye = detection.landmarks.getLeftEye()[0];
+                let rightEye = detection.landmarks.getRightEye()[0];
+                let eyeDistance = Math.abs(rightEye.x - leftEye.x);
+                let nose = detection.landmarks.getNose()[4];
+                if (detection.detection.score > 0.9) {
 
-                        average = 0
-                        for (i = 0 ; i < ageslow.length ; i++ ) {
-                            average +=ageslow[i];  
-                        }
-                        average /= ageslow.length;
-                        display_agelow.innerHTML = Math.floor(average).toString();
-                        display_agelow.style.color  = "orange";
+                    ages.unshift (age);
+                    ages = ages.slice(0,50);
+                    average = 0;
+                    for (i = 0 ; i < ages.length ; i++ ) {
+                        average +=ages[i];  
+                    }
+                    average /= ages.length;
+                    display_age.innerHTML = Math.floor(average).toString();
+                    if(changecolor) {
+                        display_age.style.background = 'green';
+                        display_age.style.color = 'white';
+                    } else {
+                        display_age.style.background = 'white';
+                        display_age.style.color = 'green';
+                    }
+                    changecolor = !changecolor ;
 
-                        loopindex ++ ;
-                        if (loopindex >= detectionloop.length) { loopindex = 0; }
-                        display_loop.innerHTML = detectionloop[loopindex] ;
+                    loopindex ++ ;
+                    if (loopindex >= detectionloop.length) { loopindex = 0; }
+                    display_loop.innerHTML = detectionloop[loopindex] ;
 
-                        display_gender.innerHTML = gender
+                    display_gender.innerHTML = gender
 
-                        context.drawImage(video,0,0,640,480); 
-
-                        // const dims = detection.detection.box ;
-                        // context.beginPath();
-                        // context.lineWidth = "4";
-                        // context.strokeStyle = "blue";
-                        // context.rect(dims.x, dims.y, dims.width, dims.height); 
-                        // context.stroke();
-
-                        // const drawOptions = {
-                        //     label: Math.round(detection.age).toString() + " " 
-                        // }
-                        // const drawBox = new faceapi.draw.DrawBox(dims, drawOptions);
-                        // drawBox.draw(canvas);
-            
-
-
-                        //display_score.innerHTML = detection.detection.score.toString();
-                        
-                    }  
- 
-
+                    context.drawImage(testvideo,0,0,640,480); 
+                    
+                }    
             }
         }
-        
+        overlayctx.drawImage(video,0,0,320,240); 
         process_frame()
     }
-
     requestAnimationFrame(animationLoop)
 
 };

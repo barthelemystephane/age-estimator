@@ -1,0 +1,60 @@
+body {
+  min-height: 100vh;
+  position: relative;
+  display: flex;
+  justify-content: left;
+  align-items: left;
+}
+
+#videoin {
+    display:none
+}
+
+#videoselect{
+  position: absolute;
+  top: 0;
+  left: 330px;
+  z-index: 20;
+  opacity: 1;
+  justify-content: left;
+  align-items: left;
+}
+
+#agedisplay {
+  position: absolute;
+  top: 400px;
+  left: 320px;
+  z-index: 30;
+  opacity: 1;
+  font-size: 40px;
+  text-align: center;
+  vertical-align: middle;
+  line-height: 40px;   
+  color:blue
+
+}    
+
+#overlay {
+position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 20;
+  opacity: 1;
+}   
+
+#canvasplace {
+  position: absolute;
+  top: 250px;
+  left: 0;
+  z-index: 20;
+  opacity: 1;
+  border:2px solid black
+ }
+
+#log {
+  position: absolute;
+  top: 750px;
+  left: 0px;
+  z-index: 20;
+  opacity: 1;
+}
